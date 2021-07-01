@@ -15,12 +15,13 @@ export class AuthService {
     }
 
     register(credentials: RegisterDTO) {
-        if (credentials.email === this.mockUser.user.email)
-            return this.mockUser;
-        throw new NotFoundException('No existe');
+        return this.mockUser;
     }
 
     login(credentials: LoginDTO) {
-        return credentials;
+        if (credentials.email === this.mockUser.user.email)
+            return credentials;
+        throw new NotFoundException('No existe');
+
     }
 }
