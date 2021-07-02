@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { DbConfigModule } from './config/database/config.module';
 import { DbConfigService } from './config/database/config.service';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
       inject: [DbConfigService],
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
