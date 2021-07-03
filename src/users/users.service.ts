@@ -61,7 +61,7 @@ export class UsersService {
 
     async updateOne(username: string, dto: EditUserDTO): Promise<UserEntity & EditUserDTO> {
         try {
-            const exists = await this.userRepository.findOne({ where: { username: username } });
+            const exists = await this.userRepository.findOne({ where: { username } });
             if (!exists) throw new NotFoundException();
             const edited = Object.assign(exists, dto);
             return await this.userRepository.save(edited);
@@ -70,9 +70,21 @@ export class UsersService {
         }
     }
 
-    async followUser(username: string) { }
+    async followUser(currentUser: UserEntity, username: string) {
+        const user = await this.userRepository.findOne({ where: { username }, relations: ['followers'] });
+        const current = await this.userRepository.findOne({ where: { username: currentUser.username } });
+        user.followers.push(current);
+        await user.save();
+        return user.toProfile(current);
+    }
 
-    async unfollowUser(username: string) { }
+    async unfollowUser(currentUser: UserEntity, username: string) {
+        const user = await this.userRepository.findOne({ where: { username }, relations: ['followers'] });
+        const current = await this.userRepository.findOne({ where: { username: currentUser.username } });
+        user.followers = user.followers.filter(follower => follower !== current);
+        await user.save();
+        return user.toProfile(current);
+    }
 
     async deleteOne() { }
 }

@@ -10,7 +10,8 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Get()
     async getCurrentUser(@Request() { user: { username } }) {
-        return this.usersService.findByUsername(username);
+        const user = await this.usersService.findByUsername(username);
+        return { user };
     }
 
     @UseGuards(JwtAuthGuard)
@@ -19,6 +20,7 @@ export class UsersController {
         @Request() { user: { username } },
         @Body() dto: EditUserDTO
     ) {
-        return this.usersService.updateOne(username, dto);
+        const user = await this.usersService.updateOne(username, dto);
+        return { user };
     }
 }

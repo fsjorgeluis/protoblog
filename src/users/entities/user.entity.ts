@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import { classToPlain, Exclude } from 'class-transformer';
@@ -24,8 +24,12 @@ export class UserEntity extends AbstractEntity {
     @Column({ default: null, nullable: true })
     avatar: string | null;
 
-    // TODO: add following
+    @ManyToMany(type => UserEntity, user => user.followee)
+    @JoinTable()
+    followers: UserEntity[];
 
+    @ManyToMany(type => UserEntity, user => user.followers)
+    followee: UserEntity[];
 
     @BeforeInsert()
     async hashPassword() {
@@ -39,5 +43,12 @@ export class UserEntity extends AbstractEntity {
 
     toJSON() {
         return classToPlain(this);
+    }
+
+    toProfile(user: UserEntity) {
+        const following = this.followers.includes(user);
+        const profile: any = this.toJSON();
+        delete profile.followers;
+        return { ...profile, following };
     }
 }

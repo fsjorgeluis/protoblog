@@ -1,4 +1,5 @@
-import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards';
 import { UsersService } from '../users.service';
 
 @Controller('profiles')
@@ -11,13 +12,23 @@ export class ProfileController {
         return { profile };
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post(':username/follow')
-    async followUser(@Param('username') username: string) {
-        return this.usersService.followUser(username);
+    async followUser(
+        @Request() { user },
+        @Param('username') username: string
+    ) {
+        const profile = await this.usersService.followUser(user, username);
+        return { profile };
     }
 
+    @UseGuards(JwtAuthGuard)
     @Delete(':username/follow')
-    async unfollowUser(@Param('username') username: string) {
-        return this.usersService.unfollowUser(username);
+    async unfollowUser(
+        @Request() { user },
+        @Param('username') username: string
+    ) {
+        const profile = await this.usersService.unfollowUser(user, username);
+        return { profile };
     }
 }
