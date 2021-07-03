@@ -1,12 +1,12 @@
 import {
     ConflictException,
-    ForbiddenException,
     Injectable,
-    InternalServerErrorException
+    InternalServerErrorException,
+    NotFoundException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDTO } from './dtos';
+import { CreateUserDTO, EditUserDTO } from './dtos';
 import { UserEntity } from './entities';
 
 @Injectable()
@@ -36,18 +36,43 @@ export class UsersService {
     async findOne(email: string): Promise<UserEntity> {
         try {
             const user = await this.userRepository.findOne({ email });
-            if (!user) throw new ForbiddenException('El email no se encuentra registrado!');
+            if (!user) throw new NotFoundException('El email no se encuentra registrado!');
             return user;
         } catch (error) {
-            console.log(error)
-            if (error.status === 403) {
-                throw new ForbiddenException('El email no se encuentra registrado!');
+            if (error.status === 404) {
+                throw new NotFoundException('El email no se encuentra registrado!');
             }
             throw new InternalServerErrorException();
         }
     }
 
-    async updateOne() { }
+    async findByUsername(username: string): Promise<UserEntity> {
+        try {
+            const user = await this.userRepository.findOne({ username });
+            if (!user) throw new NotFoundException();
+            return user;
+        } catch (error) {
+            if (error.status === 404) {
+                throw new NotFoundException('El usuario no se encuentra registrado!');
+            }
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async updateOne(username: string, dto: EditUserDTO): Promise<UserEntity & EditUserDTO> {
+        try {
+            const exists = await this.userRepository.findOne({ where: { username: username } });
+            if (!exists) throw new NotFoundException();
+            const edited = Object.assign(exists, dto);
+            return await this.userRepository.save(edited);
+        } catch (error) {
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async followUser(username: string) { }
+
+    async unfollowUser(username: string) { }
 
     async deleteOne() { }
 }

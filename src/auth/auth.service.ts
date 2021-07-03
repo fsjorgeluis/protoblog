@@ -1,8 +1,5 @@
 import {
-    ForbiddenException,
     Injectable,
-    InternalServerErrorException,
-    UnauthorizedException
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
@@ -28,24 +25,17 @@ export class AuthService {
         return this.userService.createOne(credentials);
     }
 
-    async login(user: any) {
-        const { username, id, role } = user.user;
+    async login(user: any): Promise<object> {
+        const { username, id, role, email, bio, avatar } = user.user;
         const payload = { username: username, sub: id, role: role };
         return {
+            id,
+            username,
+            email,
+            role,
+            bio,
+            avatar,
             access_token: this.jwtService.sign(payload)
         }
-        // try {
-        //     const user = await this.userService.findOne(email);
-        //     if (user && await user.comparePassword(password)) return user;
-        //     else throw new UnauthorizedException('Credenciales inválidas.');
-        // } catch (error) {
-        //     if (error.status === 401) {
-        //         throw new UnauthorizedException('Credenciales inválidas.');
-        //     }
-        //     if (error.status === 403) {
-        //         throw new ForbiddenException('El email no se encuentra registrado!');
-        //     }
-        //     throw new InternalServerErrorException();
-        // }
     }
 }
